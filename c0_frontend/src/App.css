@@ -1,0 +1,7 @@
+/* ─── App-Level Layout Styles ─────────────────────────────────────────────── */
+
+/*
+ * Component-specific styles live in Tailwind utility classes within each .tsx.
+ * This file is reserved for app-wide layout overrides that can't be expressed
+ * via Tailwind (e.g. vendor animation quirks, print styles, etc.).
+ */
