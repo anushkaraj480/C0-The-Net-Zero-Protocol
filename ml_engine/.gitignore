@@ -1,1 +1,34 @@
-data/
+# ──────────────────────────────────────────────
+# C0 ML Engine — .gitignore
+# ──────────────────────────────────────────────
+
+# Downloaded raw datasets (large files, re-downloadable)
+data/*.csv
+data/*.zip
+data/*.xlsx
+
+# Generated datasets (created by prepare_data.py)
+data/india_combined_clean.csv
+data/india_training_dataset.csv
+
+# Trained model artifacts (created by train.py)
+models/*.pkl
+models/*.joblib
+
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Jupyter notebooks (if any)
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
