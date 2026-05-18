@@ -6,16 +6,26 @@
 
 ## 📋 Overview
 
-This folder contains everything you need to train the C0 carbon credit estimation model. The model predicts how many **tonnes of CO2 equivalent (tCO2e)** a project will sequester based on:
+This module takes **real open-source environmental datasets**, cleans and filters them to **India only**, and generates a calibrated training dataset for three activity types:
 
-| Feature | Description | Example |
-|---------|-------------|---------|
-| `land_size_hectares` | Area of land involved (in hectares) | `100` |
-| `activity_type` | Type of sustainability activity | `Afforestation`, `Reforestation`, `Regenerative Agriculture` |
-| `climate_zone` | Climate classification of the region | `Tropical Wet`, `Arid`, `Subtropical`, etc. |
-| `state` | Indian state where the project is located | `Kerala`, `Rajasthan`, `Uttarakhand`, etc. |
+| Activity | Description | Base Rate |
+|----------|-------------|-----------|
+| **Afforestation** | New forest plantations on barren/degraded land | ~8.0 tCO2e/ha/yr |
+| **Reforestation** | Replanting on previously forested land | ~10.5 tCO2e/ha/yr |
+| **Regenerative Agriculture** | Soil carbon via no-till, cover crops, composting | ~2.8 tCO2e/ha/yr |
 
-The model uses a **Random Forest Regressor** wrapped in a scikit-learn pipeline with automatic one-hot encoding for categorical features.
+The model predicts **estimated carbon credits (tCO2e)** based on:
+
+| Feature | Description |
+|---------|-------------|
+| `land_size_hectares` | Area of land (5–500 ha) |
+| `activity_type` | Afforestation / Reforestation / Regenerative Agriculture |
+| `climate_zone` | Tropical Wet, Tropical Dry, Arid, Subtropical, Humid Subtropical |
+| `state` | 28 Indian states |
+| `project_age_years` | Years since project started (1–10) |
+| `avg_rainfall_mm` | State's average annual rainfall |
+| `forest_cover_pct` | State's forest cover percentage (from ISFR 2023) |
+| `soil_organic_carbon` | Soil carbon level: Very Low / Low / Medium / High |
 
 ---
 
@@ -23,17 +33,36 @@ The model uses a **Random Forest Regressor** wrapped in a scikit-learn pipeline 
 
 ```
 ml_engine/
-├── README.md              ← You are here
-├── requirements.txt       ← Python dependencies
-├── train.py               ← Training script (run this!)
-├── .gitignore             ← Keeps data/ out of Git
-├── data/                  ← Datasets (downloaded locally, not in Git)
-│   ├── land_use_emissions.csv        ← OWID global CO2 dataset (reference)
-│   ├── emission_factors_base.csv     ← Global fossil fuel emissions (reference)
-│   └── india_training_dataset.csv    ← Generated after running train.py
-└── models/                ← Trained model artifacts
-    └── c0_estimator.pkl   ← Generated after running train.py
+├── README.md               ← You are here
+├── requirements.txt         ← Python dependencies
+├── prepare_data.py          ← Step 1: Clean datasets & generate training data
+├── train.py                 ← Step 2: Train the ML model
+├── .gitignore               ← Keeps data/ out of Git
+├── data/                    ← Datasets (local only, not in Git)
+│   ├── land_use_emissions.csv               ← OWID global CO2 (filtered to India)
+│   ├── emission_factors_base.csv            ← Global fossil fuel data
+│   ├── API_IND_AG.LND.FRST.K2_*.csv        ← World Bank: India forest area
+│   ├── API_IND_AG.LND.AGRI.K2_*.csv        ← World Bank: India agricultural land
+│   ├── API_IND_AG.LND.ARBL.HA_*.csv        ← World Bank: India arable land
+│   ├── india_combined_clean.csv             ← Generated: merged India macro data
+│   └── india_training_dataset.csv           ← Generated: final training data (5000 rows)
+└── models/
+    └── c0_estimator.pkl     ← Generated: trained model artifact
 ```
+
+---
+
+## 📊 Data Sources
+
+All data is **open source** and India-specific:
+
+| Source | What It Contains | URL |
+|--------|-----------------|-----|
+| **OWID CO2 Data** | India's CO2, GHG, methane, land-use change emissions (1850–2023) | [GitHub](https://github.com/owid/co2-data) |
+| **World Bank** | India forest area, agricultural land, arable land time-series | [API](https://api.worldbank.org/) |
+| **Global Fossil Fuel** | Global fossil fuel emission trends (for context) | [GitHub](https://github.com/datasets/co2-fossil-global) |
+| **ISFR 2023** | State-wise forest cover %, used for state profiles | [FSI](https://fsi.nic.in/) |
+| **ICFRE / ICAR** | Carbon sequestration base rates for Indian conditions | Research literature |
 
 ---
 
@@ -41,8 +70,8 @@ ml_engine/
 
 ### Prerequisites
 
-- **Python 3.10+** installed on your system
-- **Git** configured with push access to this repository
+- **Python 3.10+**
+- **Git** with push access to this repository
 - A terminal (bash, zsh, PowerShell, etc.)
 
 ---
@@ -56,7 +85,6 @@ git checkout feature/carbon-ml-model
 ```
 
 If you already have the repo cloned:
-
 ```bash
 git fetch origin
 git checkout feature/carbon-ml-model
@@ -69,10 +97,7 @@ git checkout feature/carbon-ml-model
 ```bash
 cd ml_engine
 
-# Create a virtual environment
 python3 -m venv venv
-
-# Activate it
 source venv/bin/activate        # Linux / macOS
 # venv\Scripts\activate         # Windows
 ```
@@ -85,123 +110,110 @@ source venv/bin/activate        # Linux / macOS
 pip install -r requirements.txt
 ```
 
-This installs:
-- `pandas` — Data manipulation
-- `scikit-learn` — ML model training
-- `joblib` — Model serialization
-- `numpy` — Numerical operations
-
 ---
 
-### Step 4: Download the Reference Datasets
+### Step 4: Download the Raw Datasets
 
 The raw data files are **not stored in Git** (they're in `.gitignore`). Download them locally:
 
 ```bash
-# Create the data directory if it doesn't exist
 mkdir -p data
 
-# Download the OWID global CO2 dataset (India data is filtered from this)
+# 1. OWID global CO2 dataset (~14 MB, will be filtered to India)
 curl -L -o data/land_use_emissions.csv \
   "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv"
 
-# Download supplemental global fossil fuel emissions data
+# 2. Global fossil fuel emissions
 curl -L -o data/emission_factors_base.csv \
   "https://raw.githubusercontent.com/datasets/co2-fossil-global/main/data/global.csv"
+
+# 3. World Bank: India Forest Area (sq. km)
+curl -sL -o data/wb_forest.zip \
+  "https://api.worldbank.org/v2/country/IND/indicator/AG.LND.FRST.K2?downloadformat=csv" && \
+  unzip -o data/wb_forest.zip -d data/ && rm data/wb_forest.zip data/Metadata_*.csv
+
+# 4. World Bank: India Agricultural Land (sq. km)
+curl -sL -o data/wb_agland.zip \
+  "https://api.worldbank.org/v2/country/IND/indicator/AG.LND.AGRI.K2?downloadformat=csv" && \
+  unzip -o data/wb_agland.zip -d data/ && rm data/wb_agland.zip data/Metadata_*.csv
+
+# 5. World Bank: India Arable Land (hectares)
+curl -sL -o data/wb_arable.zip \
+  "https://api.worldbank.org/v2/country/IND/indicator/AG.LND.ARBL.HA?downloadformat=csv" && \
+  unzip -o data/wb_arable.zip -d data/ && rm data/wb_arable.zip data/Metadata_*.csv
 ```
 
 ---
 
-### Step 5: Train the Model 🏋️
+### Step 5: Prepare & Clean the Data 🧹
+
+```bash
+python prepare_data.py
+```
+
+**What this does:**
+1. Reads the OWID dataset (50,000+ rows) → **filters to India only** (175 rows)
+2. Keeps only carbon/land-use relevant columns (drops 50+ irrelevant ones)
+3. Parses World Bank CSV data for forest area, agricultural land, arable land
+4. **Merges all datasets** on year into `india_combined_clean.csv`
+5. Uses real Indian state profiles (28 states, ISFR 2023 data) to generate **5,000 training samples**
+6. Saves the final training dataset to `india_training_dataset.csv`
+
+---
+
+### Step 6: Train the Model 🏋️
 
 ```bash
 python train.py
 ```
 
 **What this does:**
-1. Loads the OWID dataset and extracts India-specific reference data
-2. Generates **3,000 India-specific training samples** covering:
-   - **27 Indian states** (Kerala, Rajasthan, Uttarakhand, Punjab, etc.)
-   - **3 activity types**: Afforestation, Reforestation, Regenerative Agriculture
-   - **5 climate zones**: Tropical Wet, Tropical Dry, Arid, Subtropical, Humid Subtropical
-3. Trains a **Random Forest Regressor** (200 estimators)
-4. Prints the model's R² score (should be **> 0.99**)
-5. Saves the trained model to `models/c0_estimator.pkl`
-6. Runs sanity-check predictions for sample projects
-
-**Expected output:**
-```
-🚀 Loading datasets...
-📊 India reference context — Year: 2022, CO2 (Mt): 2830.84, ...
-📝 Synthesizing India-specific training dataset...
-✅ Generated 3000 India-specific training samples
-🏋️ Training the Random Forest model...
-
-📊 Model Performance:
-   Train R² : 0.99xx
-   Test  R² : 0.99xx
-
-💾 Saved trained model to 'models/c0_estimator.pkl'
-
-🔍 Sanity check predictions:
-   Kerala               | Afforestation                | 100 ha →    1080.00 tCO2e
-   Uttarakhand          | Reforestation                |  50 ha →     575.00 tCO2e
-   Punjab               | Regenerative Agriculture     | 200 ha →     550.00 tCO2e
-   Rajasthan            | Afforestation                | 150 ha →     660.00 tCO2e
-
-✅ All done!
-```
+1. Loads the cleaned `india_training_dataset.csv`
+2. Splits into train (80%) and test (20%)
+3. Builds a scikit-learn Pipeline with OneHotEncoding + Random Forest (200 trees)
+4. Trains the model and evaluates it
+5. Runs 5-fold cross-validation
+6. Shows top feature importances
+7. Saves the trained model to `models/c0_estimator.pkl`
+8. Prints sanity-check predictions for sample Indian projects
 
 ---
 
-### Step 6: Push the Trained Model Back to GitHub
-
-Once training is complete, push the `.pkl` artifact back to this branch:
+### Step 7: Push the Trained Model Back to GitHub
 
 ```bash
-# Go back to the project root
-cd ..
+cd ..  # Back to project root
 
-# Stage the model file
 git add ml_engine/models/c0_estimator.pkl
-
-# Commit it
 git commit -m "feat: upload trained carbon estimation model artifact"
-
-# Push to this branch
 git push origin feature/carbon-ml-model
 ```
-
-That's it! Once you push, we can merge this into the main branch and integrate the model into the C0 backend.
 
 ---
 
 ## 🔬 How the Model Works
 
-### Carbon Sequestration Rates (India-Calibrated)
-
-The training data uses base sequestration rates derived from Indian forestry and agricultural studies:
-
-| Activity Type | Base Rate (tCO2e/ha/year) | Source Context |
-|---------------|--------------------------|----------------|
-| Afforestation | ~8.0 | New forest on barren/degraded land |
-| Reforestation | ~10.0 | Replanting previously forested land (faster canopy recovery) |
-| Regenerative Agriculture | ~2.5 | Soil carbon via cover crops, no-till, composting |
-
-### Climate Zone Multipliers
+### Climate Zone Multipliers (India-Specific)
 
 | Climate Zone | Multiplier | States |
 |-------------|------------|--------|
-| Tropical Wet | 1.35× | Kerala, Goa, Meghalaya, Assam, Mizoram |
+| Tropical Wet | 1.40× | Kerala, Goa, Meghalaya, Assam, Mizoram, Nagaland, Tripura |
 | Tropical Dry | 1.00× | Maharashtra, Karnataka, Tamil Nadu, Andhra Pradesh, Telangana |
-| Arid | 0.55× | Rajasthan, Gujarat, Kutch |
-| Subtropical | 1.15× | Himachal Pradesh, Uttarakhand, Sikkim, Arunachal Pradesh |
-| Humid Subtropical | 1.10× | UP, MP, Bihar, Punjab, Odisha, Jharkhand, Chhattisgarh, West Bengal |
+| Arid | 0.50× | Rajasthan, Gujarat |
+| Subtropical | 1.20× | Himachal Pradesh, Uttarakhand, Sikkim, Arunachal Pradesh, Manipur |
+| Humid Subtropical | 1.10× | UP, MP, Bihar, Punjab, Odisha, Jharkhand, Chhattisgarh, West Bengal, Haryana |
+
+### Additional Factors
+
+- **Rainfall** — Higher rainfall → more biomass → more sequestration (capped at 1.3×)
+- **Soil Organic Carbon** — Very Low (0.7×) to High (1.15×)
+- **Project Age** — Younger projects yield less; ramps from 0.46× (year 1) to 1.0× (year 10)
+- **Additionality Bonus** — Afforestation in low-forest states gets 1.15× bonus
 
 ### Formula
 
 ```
-estimated_credits = land_size × base_rate × climate_multiplier + noise
+credits = land_ha × base_rate × climate_mult × rainfall_factor × soc_mult × age_factor × additionality
 ```
 
 ---
@@ -211,12 +223,13 @@ estimated_credits = land_size × base_rate × climate_multiplier + noise
 | Issue | Fix |
 |-------|-----|
 | `ModuleNotFoundError: No module named 'sklearn'` | Run `pip install -r requirements.txt` |
+| `FileNotFoundError: data/india_training_dataset.csv` | Run `python prepare_data.py` first |
 | `FileNotFoundError: data/land_use_emissions.csv` | Run the `curl` commands from Step 4 |
-| `PermissionError` on `models/` | Run `mkdir -p models` to create the directory |
-| Low R² score | Check that `numpy` random seed is set to `42` |
+| `PermissionError` on `models/` | Run `mkdir -p models` |
+| World Bank ZIP download fails | Try again; the API occasionally times out |
 
 ---
 
 ## 📬 Questions?
 
-Reach out to the project maintainer or open an issue on the [C0 GitHub repo](https://github.com/anushkaraj480/C0-The-Net-Zero-Protocol).
+Open an issue on the [C0 GitHub repo](https://github.com/anushkaraj480/C0-The-Net-Zero-Protocol).
