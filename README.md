@@ -27,6 +27,19 @@ C0 Project/
 
 ### Backend (Django)
 
+**1. Set up PostgreSQL** (one-time):
+```bash
+# Fedora
+sudo dnf install -y postgresql-server postgresql postgresql-devel
+sudo postgresql-setup --initdb
+sudo systemctl enable --now postgresql
+
+# Create the database and user
+sudo -u postgres psql -c "CREATE USER c0_user WITH PASSWORD 'c0_pass';"
+sudo -u postgres psql -c "CREATE DATABASE c0_db OWNER c0_user;"
+```
+
+**2. Start the backend:**
 ```bash
 cd c0_backend
 python -m venv venv
@@ -34,8 +47,12 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_data      # Load sample data
+python manage.py createsuperuser # Create admin account
 python manage.py runserver      # → http://localhost:8000
 ```
+
+**3. Access the database (Web GUI):**
+Open **http://127.0.0.1:8000/admin/** and log in with your superuser credentials to browse and edit all tables.
 
 ### Frontend (React + Vite)
 
@@ -70,4 +87,4 @@ After running `seed_data`:
 
 - **Frontend:** React 19, TypeScript, Vite, Three.js, Framer Motion, Recharts
 - **Backend:** Django 5.2, Django REST Framework, SimpleJWT
-- **Database:** SQLite (dev) — easily swappable to PostgreSQL for production
+- **Database:** PostgreSQL (via `psycopg2-binary`)

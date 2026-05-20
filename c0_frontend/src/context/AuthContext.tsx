@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { authAPI } from '../api/client';
 import type { UserInfo } from '../api/client';
 
@@ -7,7 +8,16 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, role?: string) => Promise<void>;
+  register: (payload: {
+    username: string;
+    email: string;
+    password: string;
+    role?: string;
+    phone?: string;
+    location?: string;
+    pincode?: string;
+    company_name?: string;
+  }) => Promise<void>;
   logout: () => void;
   error: string | null;
   clearError: () => void;
@@ -22,16 +32,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for existing session on mount
   useEffect(() => {
-    if (authAPI.isLoggedIn()) {
-      authAPI.me()
-        .then(setUser)
-        .catch(() => {
-          authAPI.logout();
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+    const validateSession = async () => {
+      if (!authAPI.isLoggedIn()) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const me = await authAPI.me();
+        setUser(me);
+      } catch {
+        // Session is invalid (expired, user deleted, etc.)
+        // Force-clear everything so fresh login works
+        console.warn('[C0 Auth] Stale session detected — clearing tokens');
+        localStorage.removeItem('c0_access_token');
+        localStorage.removeItem('c0_refresh_token');
+        authAPI.logout();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    validateSession();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -47,12 +67,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, role = 'farmer') => {
+  const register = async (payload: {
+    username: string;
+    email: string;
+    password: string;
+    role?: string;
+    phone?: string;
+    location?: string;
+    pincode?: string;
+    company_name?: string;
+  }) => {
     setError(null);
     try {
-      await authAPI.register({ username, email, password, role });
+      await authAPI.register(payload);
       // Auto-login after registration
-      await login(username, password);
+      await login(payload.username, payload.password);
     } catch (err: any) {
       const errors = err.response?.data;
       if (errors && typeof errors === 'object') {

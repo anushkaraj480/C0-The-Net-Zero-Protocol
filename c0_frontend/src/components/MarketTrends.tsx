@@ -10,50 +10,80 @@ import type { TrendPoint } from '../api/client';
 // Month abbreviations for chart
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-interface ChartData {
+// Color palette for project types — vibrant, distinct colors
+const TYPE_COLORS: Record<string, string> = {
+  reforestation:      '#00FFB2',  // primary green
+  soil_carbon:        '#00CFFF',  // accent blue
+  renewable_energy:   '#facc15',  // yellow
+  blue_carbon:        '#a78bfa',  // purple
+  methane_capture:    '#f97316',  // orange
+  direct_air_capture: '#f43f5e',  // rose
+  iex_green_market:   '#ffffff',  // pure white for the market index
+};
+
+// Human-readable labels
+const TYPE_LABELS: Record<string, string> = {
+  reforestation:      'Reforestation',
+  soil_carbon:        'Soil Carbon',
+  renewable_energy:   'Renewable',
+  blue_carbon:        'Blue Carbon',
+  methane_capture:    'Methane',
+  direct_air_capture: 'DAC',
+  iex_green_market:   'IEX Green Market (REC)',
+};
+
+interface ChartRow {
   name: string;
-  forest?: number;
-  agri?: number;
-  mangrove?: number;
-  wetland?: number;
+  [key: string]: string | number | undefined;
 }
 
 export default function MarketTrends() {
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [chartData, setChartData] = useState<ChartRow[]>([]);
+  const [projectTypes, setProjectTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     marketplaceAPI.getTrends()
       .then((trends) => {
+        // Collect and filter project types to only show the required core depictions
+        const typesSet = new Set<string>();
+        trends.forEach((p: TrendPoint) => typesSet.add(p.project_type));
+        
+        const ALLOWED_TYPES = ['reforestation', 'soil_carbon', 'renewable_energy', 'iex_green_market'];
+        const types = Array.from(typesSet).filter(type => ALLOWED_TYPES.includes(type));
+        
+        setProjectTypes(types);
+
         // Group by month, pivot project_type into columns
-        const monthMap = new Map<string, ChartData>();
+        const monthMap = new Map<string, ChartRow>();
         
         trends.forEach((point: TrendPoint) => {
-          const date = new Date(point.month);
-          const label = MONTH_NAMES[date.getMonth()];
+          const date = new Date(point.month + '-01');
+          const label = `${MONTH_NAMES[date.getMonth()]} '${String(date.getFullYear()).slice(2)}`;
           
-          if (!monthMap.has(label)) {
-            monthMap.set(label, { name: label });
+          if (!monthMap.has(point.month)) {
+            monthMap.set(point.month, { name: label });
           }
-          const entry = monthMap.get(label)!;
-          
-          if (point.project_type === 'forestry') entry.forest = Number(point.avg_price);
-          else if (point.project_type === 'agriculture') entry.agri = Number(point.avg_price);
-          else if (point.project_type === 'mangrove') entry.mangrove = Number(point.avg_price);
-          else if (point.project_type === 'wetland') entry.wetland = Number(point.avg_price);
+          const entry = monthMap.get(point.month)!;
+          entry[point.project_type] = Number(point.avg_price);
         });
 
-        setChartData(Array.from(monthMap.values()));
+        // Sort by date key and convert to array
+        const sorted = Array.from(monthMap.entries())
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([, row]) => row);
+
+        setChartData(sorted);
       })
       .catch(() => {
-        // Fallback to static data if API fails
+        // Fallback static data
+        setProjectTypes(['reforestation', 'soil_carbon', 'renewable_energy']);
         setChartData([
-          { name: 'Jan', forest: 12, agri: 10 },
-          { name: 'Feb', forest: 13, agri: 11 },
-          { name: 'Mar', forest: 12.5, agri: 11.5 },
-          { name: 'Apr', forest: 14, agri: 13 },
-          { name: 'May', forest: 15.2, agri: 14 },
-          { name: 'Jun', forest: 16.5, agri: 14.5 },
+          { name: "Jan '26", reforestation: 10.5, soil_carbon: 16.0, renewable_energy: 19.5 },
+          { name: "Feb '26", reforestation: 11.0, soil_carbon: 16.8, renewable_energy: 20.0 },
+          { name: "Mar '26", reforestation: 11.2, soil_carbon: 17.5, renewable_energy: 20.5 },
+          { name: "Apr '26", reforestation: 11.8, soil_carbon: 18.0, renewable_energy: 21.0 },
+          { name: "May '26", reforestation: 12.5, soil_carbon: 18.75, renewable_energy: 22.0 },
         ]);
       })
       .finally(() => setLoading(false));
@@ -61,35 +91,76 @@ export default function MarketTrends() {
 
   return (
     <section id="market" className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-bold mb-4">Market Analysis</h2>
+        <p className="text-gray-400">Explore live carbon credit pricing and sequestration projections.</p>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         
-        {/* Credit Price Trends */}
+        {/* Carbon Price Trend */}
         <div className="glass-panel p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold">Credit Price Trends</h3>
-            <div className="flex gap-2 flex-wrap">
-              <span className="flex items-center gap-1 text-xs"><div className="w-2 h-2 rounded-full bg-primary"></div> Forest</span>
-              <span className="flex items-center gap-1 text-xs"><div className="w-2 h-2 rounded-full bg-accent"></div> Agri</span>
-              <span className="flex items-center gap-1 text-xs"><div className="w-2 h-2 rounded-full bg-purple-400"></div> Mangrove</span>
-              <span className="flex items-center gap-1 text-xs"><div className="w-2 h-2 rounded-full bg-yellow-400"></div> Wetland</span>
+            <h3 className="text-xl font-bold">Carbon Price Trend</h3>
+            <div className="flex gap-3 flex-wrap">
+              {projectTypes.map(type => (
+                <span key={type} className="flex items-center gap-1 text-xs">
+                  <div 
+                    className="w-2 h-2 rounded-full" 
+                    style={{ backgroundColor: TYPE_COLORS[type] || '#888' }} 
+                  />
+                  {TYPE_LABELS[type] || type}
+                </span>
+              ))}
             </div>
           </div>
-          <div className="h-64">
+          <div className="h-72">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                  <XAxis dataKey="name" stroke="#ffffff50" axisLine={false} tickLine={false} />
-                  <YAxis stroke="#ffffff50" axisLine={false} tickLine={false} tickFormatter={(val) => `$${val}`} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: '#0B0F1A', borderColor: '#ffffff20', borderRadius: '8px' }} />
-                  <Line type="monotone" dataKey="forest" stroke="#00FFB2" strokeWidth={3} dot={{ r: 4, fill: '#0B0F1A', strokeWidth: 2 }} />
-                  <Line type="monotone" dataKey="agri" stroke="#00CFFF" strokeWidth={3} dot={{ r: 4, fill: '#0B0F1A', strokeWidth: 2 }} />
-                  <Line type="monotone" dataKey="mangrove" stroke="#a78bfa" strokeWidth={3} dot={{ r: 4, fill: '#0B0F1A', strokeWidth: 2 }} />
-                  <Line type="monotone" dataKey="wetland" stroke="#facc15" strokeWidth={3} dot={{ r: 4, fill: '#0B0F1A', strokeWidth: 2 }} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#ffffff50" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fontSize: 11 }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    stroke="#ffffff50" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tickFormatter={(val) => `₹${val}`}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <RechartsTooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#0B0F1A', 
+                      borderColor: '#ffffff20', 
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }} 
+                    formatter={(value: any, name: any) => [
+                      `₹${value.toFixed(2)}`, 
+                      TYPE_LABELS[name] || name
+                    ]}
+                  />
+                  {projectTypes.map(type => (
+                    <Line 
+                      key={type}
+                      type="monotone" 
+                      dataKey={type} 
+                      stroke={TYPE_COLORS[type] || '#888'} 
+                      strokeWidth={2.5} 
+                      dot={{ r: 3, fill: '#0B0F1A', strokeWidth: 2 }}
+                      activeDot={{ r: 5, strokeWidth: 2 }}
+                      connectNulls
+                    />
+                  ))}
                 </LineChart>
               </ResponsiveContainer>
             )}
@@ -103,7 +174,7 @@ export default function MarketTrends() {
           </div>
           <h3 className="text-xl font-bold mb-2">Projected Sequestration</h3>
           <p className="text-sm text-gray-400 mb-6">Cumulative carbon stored over time per hectare.</p>
-          <div className="h-64">
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[
                 { year: 'Y1', amount: 5 },

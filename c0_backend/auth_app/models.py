@@ -12,12 +12,13 @@ class C0User(AbstractUser):
     ROLE_CHOICES = [
         ('farmer', 'Farmer / Land Owner'),
         ('buyer', 'Carbon Credit Buyer'),
-        ('verifier', 'MRV Verifier'),
-        ('admin', 'Platform Admin'),
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='farmer')
     phone = models.CharField(max_length=20, blank=True, default='')
+    location = models.CharField(max_length=255, blank=True, default='')
+    pincode = models.CharField(max_length=20, blank=True, default='')
+    company_name = models.CharField(max_length=255, blank=True, default='')
 
     class Meta:
         db_table = 'c0_users'

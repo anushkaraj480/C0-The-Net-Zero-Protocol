@@ -12,11 +12,22 @@ export default function CarbonMarket() {
   const [buyQty, setBuyQty] = useState<number>(100);
   const [buySuccess, setBuySuccess] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
 
   useEffect(() => {
     marketplaceAPI.getListings()
-      .then(setListings)
+      .then((data) => {
+        if (data.length === 0) {
+          setListings([
+            { id: 1, project_name: 'Iceland DAC Facility', project_type: 'direct_air_capture', available: '500', price: '$150.00', quantity_available: 500, location_text: '', description: '', standard: '', price_per_credit: '150.00', status: '', listed_at: '', seller_email: '' },
+            { id: 2, project_name: 'Alberta Methane Capture', project_type: 'methane_capture', available: '8000', price: '$8.90', quantity_available: 8000, location_text: '', description: '', standard: '', price_per_credit: '8.90', status: '', listed_at: '', seller_email: '' },
+            { id: 3, project_name: 'Kenya Mangrove Restoration', project_type: 'blue_carbon', available: '1500', price: '$35.00', quantity_available: 1500, location_text: '', description: '', standard: '', price_per_credit: '35.00', status: '', listed_at: '', seller_email: '' },
+            { id: 4, project_name: 'Rajasthan Solar Farm', project_type: 'renewable_energy', available: '10000', price: '$22.00', quantity_available: 10000, location_text: '', description: '', standard: '', price_per_credit: '22.00', status: '', listed_at: '', seller_email: '' },
+          ]);
+        } else {
+          setListings(data);
+        }
+      })
       .catch(() => setError('Failed to load market data'))
       .finally(() => setLoading(false));
   }, []);
@@ -45,10 +56,18 @@ export default function CarbonMarket() {
     'agriculture': 'Agriculture',
     'mangrove': 'Mangrove',
     'wetland': 'Wetland',
+    'direct_air_capture': 'Direct Air Capture',
+    'methane_capture': 'Methane Capture',
+    'blue_carbon': 'Blue Carbon',
+    'renewable_energy': 'Renewable Energy',
   };
 
+  if (!isLoggedIn || user?.role !== 'buyer') {
+    return null;
+  }
+
   return (
-    <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
+    <section id="carbon-market" className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-bold mb-4">Carbon Market</h2>
         <p className="text-gray-400">Buy and sell verified credits instantly.</p>

@@ -102,89 +102,148 @@ Everything remaining is the absolute minimum required for a modern, secure, indu
 
 ---
 
-## Part 2: Database Schema
+## Part 2: Database — PostgreSQL
 
-Right now, your application uses **SQLite** as its database. SQLite stores everything locally in a single file (`db.sqlite3` in your backend folder), which is the standard setup for Django development. 
+This application uses **PostgreSQL** as its database. PostgreSQL is an industry-standard, production-grade relational database that provides robust data integrity, advanced querying capabilities, and excellent scalability.
+
+**Connection details** (configured in `c0/settings.py` via environment variables):
+
+| Setting | Default Value |
+|---------|---------------|
+| Database Name | `c0_db` |
+| User | `c0_user` |
+| Password | `c0_pass` |
+| Host | `localhost` |
+| Port | `5432` |
 
 Based on the Django architecture we built, here are the core tables and their exact schemas.
 
 ---
 
-### 1. The Users Table (`auth_app_c0user`)
+### 1. The Users Table (`c0_users`)
 This table replaces the default Django user table to support the custom roles needed for the marketplace.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | Integer (Primary Key) | Auto-incrementing ID |
+| `id` | BigInt (Primary Key) | Auto-incrementing ID |
 | `password` | String | Hashed and salted password |
 | `last_login` | Datetime | Timestamp of last sign in |
 | `username` | String (Unique) | The user's handle |
-| `email` | String (Unique) | Contact email |
-| `role` | String (Choices) | Defines permissions. Options: `farmer`, `ngo`, `agro_firm`, `industrial_buyer` |
-| `phone_number` | String | Optional contact number |
+| `email` | String | Contact email |
+| `role` | String (Choices) | Defines permissions. Options: `farmer`, `buyer`, `verifier`, `admin` |
+| `phone` | String | Optional contact number |
 | `is_active` | Boolean | Defaults to True. Used to ban/disable users |
 | `is_staff` | Boolean | Can this user access the Django Admin panel? |
 | `date_joined` | Datetime | When the account was created |
 
 ---
 
-### 2. The Projects Table (`marketplace_carbonproject`)
+### 2. The Projects Table (`carbon_projects`)
 This table stores the physical land/initiatives that are sequestering carbon.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | Integer (Primary Key) | Auto-incrementing ID |
-| `owner_id` | Foreign Key | Links to `auth_app_c0user` (Who owns this farm/project?) |
+| `id` | BigInt (Primary Key) | Auto-incrementing ID |
+| `owner_id` | Foreign Key | Links to `c0_users` (Who owns this farm/project?) |
 | `name` | String | e.g., "Amazon Reforestation Initiative" |
-| `project_type` | String (Choices) | e.g., `forestry`, `agriculture`, `mangrove`, `wetland` |
+| `project_type` | String (Choices) | e.g., `reforestation`, `soil_carbon`, `renewable_energy`, `methane_capture`, `blue_carbon`, `direct_air_capture` |
 | `location_text` | String | Where the project is (e.g., "Amazonas, Brazil") |
 | `description` | Text | Detailed story/explanation of the project |
-| `standard` | String (Choices) | The MRV verification body: `verra`, `gold`, `bee_offset` |
+| `standard` | String (Choices) | The MRV verification body: `verra`, `gold_standard`, `acr`, `car`, `puro` |
 | `total_hectares` | Decimal | Size of the land |
 | `total_sequestered_tco2e` | Decimal | Total tons of CO2 this project has proven to remove |
 | `created_at` | Datetime | When the project was registered on the platform |
 
 ---
 
-### 3. The Market Listings Table (`marketplace_creditlisting`)
+### 3. The Market Listings Table (`credit_listings`)
 Not all carbon a project sequesters is put up for sale at once. This table represents the actual "stock" available for purchase on the market page.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | Integer (Primary Key) | Auto-incrementing ID |
-| `project_id` | Foreign Key | Links to `marketplace_carbonproject` |
-| `seller_id` | Foreign Key | Links to `auth_app_c0user` |
+| `id` | BigInt (Primary Key) | Auto-incrementing ID |
+| `project_id` | Foreign Key | Links to `carbon_projects` |
+| `seller_id` | Foreign Key | Links to `c0_users` |
 | `quantity_available` | Integer | How many tons are currently available for purchase |
 | `price_per_credit` | Decimal | Price per ton in USD (e.g., $15.00) |
-| `status` | String (Choices) | `active`, `sold_out`, `paused` |
+| `status` | String (Choices) | `active`, `sold`, `expired` |
 | `listed_at` | Datetime | When the listing went live |
 
 ---
 
-### 4. The Transactions Table (`marketplace_transaction`)
+### 4. The Transactions Table (`transactions`)
 This acts as the ledger/receipt book. Every time a buyer clicks "Buy" on the frontend, a row is created here and the `quantity_available` in the Listing table is reduced.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | Integer (Primary Key) | Auto-incrementing ID |
-| `buyer_id` | Foreign Key | Links to `auth_app_c0user` |
-| `listing_id` | Foreign Key | Links to `marketplace_creditlisting` |
+| `id` | BigInt (Primary Key) | Auto-incrementing ID |
+| `buyer_id` | Foreign Key | Links to `c0_users` |
+| `listing_id` | Foreign Key | Links to `credit_listings` |
 | `quantity_purchased` | Integer | How many tons were bought |
 | `total_price` | Decimal | Total cost of the transaction (`quantity` × `price_per_credit`) |
-| `transaction_date` | Datetime | Timestamp of purchase |
-| `certificate_hash` | String | A placeholder field for blockchain/MRV verification hashes |
+| `purchased_at` | Datetime | Timestamp of purchase |
 
 ---
 
 ### Django System Tables
-Django automatically created a few other tables to manage internal systems:
+Django automatically creates a few other tables to manage internal systems:
 * **`auth_group` / `auth_permission`**: Manages granular admin permissions.
 * **`django_migrations`**: Keeps a log of what database schemas have been applied so it knows how to upgrade the database in the future.
 * **`django_admin_log`**: Records actions taken in the `/admin/` portal for audit trails.
 * **`django_session`**: Used for admin session tracking.
+* **`django_content_type`**: Content type registry for the permissions system.
+
+---
+
+## Part 3: Accessing the Database via Django Admin (Web GUI)
+
+The easiest way to view, search, and edit all database tables is through the **Django Admin Panel** — a built-in web GUI that comes pre-configured with this project.
+
+### Setup (One-Time)
+
+1. **Create a superuser** (admin account):
+   ```bash
+   cd c0_backend
+   source venv/bin/activate
+   python manage.py createsuperuser
+   ```
+   You'll be prompted to enter a username, email, and password.
+
+2. **Start the Django server:**
+   ```bash
+   python manage.py runserver
+   ```
+
+3. **Open the admin panel in your browser:**
+   ```
+   http://127.0.0.1:8000/admin/
+   ```
+
+4. **Log in** with the superuser credentials you just created.
+
+### What You Can Do in the Admin Panel
+
+Once logged in, you'll see a clean dashboard listing all registered models:
+
+| Section | Table | Actions Available |
+|---------|-------|-------------------|
+| **AUTH_APP** | C0 Users | View all users, filter by role/active status, search by username/email, edit roles, deactivate accounts |
+| **MARKETPLACE** | Carbon Projects | View all projects, filter by type/standard, search by name/location, edit details |
+| **MARKETPLACE** | Credit Listings | View all listings, filter by status/project type, search by project name, update quantities/prices |
+| **MARKETPLACE** | Transactions | View all purchases, filter by date, see buyer and listing details |
+
+### Key Features
+
+* **Search & Filter**: Every table has search bars and dropdown filters pre-configured.
+* **Inline Editing**: Click any row to edit its fields directly.
+* **Add New Records**: Use the "Add" button in any section to create new users, projects, or listings.
+* **Bulk Actions**: Select multiple rows and delete them in bulk.
+* **Change History**: Every edit is logged — click "History" on any record to see who changed what and when.
+
+---
 
 ### How it flows:
 1. A user (`C0User` with role `farmer`) creates a `CarbonProject`.
 2. The farmer creates a `CreditListing` linked to that project, offering 1,000 tons at $15/ton.
-3. Another user (`C0User` with role `industrial_buyer`) uses the React frontend to buy 100 credits.
+3. Another user (`C0User` with role `buyer`) uses the React frontend to buy 100 credits.
 4. A `Transaction` row is created, and the `CreditListing` automatically updates its `quantity_available` down to 900.

@@ -18,7 +18,18 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">
           <a href="#projects" className="hover:text-primary transition-colors">Projects</a>
           <a href="#market" className="hover:text-primary transition-colors">Market</a>
-          <a href="#dashboard" className="hover:text-primary transition-colors">Dashboard</a>
+          {isLoggedIn && (
+            <a href="#dashboard" className="hover:text-primary transition-colors">Dashboard</a>
+          )}
+
+          {isLoggedIn && user?.role === 'buyer' && (
+            <button
+              onClick={() => document.getElementById('carbon-market')?.scrollIntoView({ behavior: 'smooth' })}
+              className="px-4 py-2 rounded-full bg-primary text-background font-bold hover:shadow-[0_0_15px_rgba(0,255,178,0.4)] transition-all"
+            >
+              Buy Carbon Credits
+            </button>
+          )}
 
           {isLoggedIn ? (
             <div className="relative">
@@ -59,7 +70,7 @@ export default function Navbar() {
               className="px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center gap-2"
             >
               <User className="w-4 h-4" />
-              Sign In
+              Sign Up
             </button>
           )}
         </div>

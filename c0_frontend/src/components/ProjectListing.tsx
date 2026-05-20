@@ -12,12 +12,15 @@ const standardIcons: Record<string, typeof CheckCircle2> = {
   'bee_offset': CheckCircle2,
 };
 
-// Map project types to gradient colors
 const typeColors: Record<string, string> = {
   'forestry': 'from-green-900',
   'agriculture': 'from-yellow-900',
   'mangrove': 'from-blue-900',
   'wetland': 'from-cyan-900',
+  'direct_air_capture': 'from-purple-900',
+  'methane_capture': 'from-orange-900',
+  'blue_carbon': 'from-indigo-900',
+  'renewable_energy': 'from-yellow-600',
 };
 
 // Human-readable labels
@@ -32,6 +35,10 @@ const typeLabels: Record<string, string> = {
   'agriculture': 'Agriculture',
   'mangrove': 'Mangrove',
   'wetland': 'Wetland',
+  'direct_air_capture': 'Direct Air Capture',
+  'methane_capture': 'Methane Capture',
+  'blue_carbon': 'Blue Carbon',
+  'renewable_energy': 'Renewable Energy',
 };
 
 export default function ProjectListing() {
@@ -45,7 +52,18 @@ export default function ProjectListing() {
 
   useEffect(() => {
     marketplaceAPI.getListings()
-      .then(setListings)
+      .then((data) => {
+        if (data.length === 0) {
+          setListings([
+            { id: 1, project_name: 'Iceland DAC Facility', project_type: 'direct_air_capture', location_text: 'Iceland', description: 'Direct air capture facility in Iceland', standard: 'gold', available: '500', price: '$150.00', quantity_available: 500, price_per_credit: '150.00', status: '', listed_at: '', seller_email: '' },
+            { id: 2, project_name: 'Alberta Methane Capture', project_type: 'methane_capture', location_text: 'Alberta, Canada', description: 'Methane capture from agriculture', standard: 'vm0042', available: '8000', price: '$8.90', quantity_available: 8000, price_per_credit: '8.90', status: '', listed_at: '', seller_email: '' },
+            { id: 3, project_name: 'Kenya Mangrove Restoration', project_type: 'blue_carbon', location_text: 'Mombasa, Kenya', description: 'Restoring mangrove ecosystems', standard: 'gold', available: '1500', price: '$35.00', quantity_available: 1500, price_per_credit: '35.00', status: '', listed_at: '', seller_email: '' },
+            { id: 4, project_name: 'Rajasthan Solar Farm', project_type: 'renewable_energy', location_text: 'Rajasthan, India', description: 'Large scale solar farm', standard: 'bee_offset', available: '10000', price: '$22.00', quantity_available: 10000, price_per_credit: '22.00', status: '', listed_at: '', seller_email: '' },
+          ]);
+        } else {
+          setListings(data);
+        }
+      })
       .catch(() => setError('Failed to load projects'))
       .finally(() => setLoading(false));
   }, []);

@@ -9,7 +9,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = C0User
-        fields = ['id', 'username', 'email', 'password', 'role', 'phone']
+        fields = ['id', 'username', 'email', 'password', 'role', 'phone', 'location', 'pincode', 'company_name']
         extra_kwargs = {
             'email': {'required': True},
         }
@@ -21,6 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             role=validated_data.get('role', 'farmer'),
             phone=validated_data.get('phone', ''),
+            location=validated_data.get('location', ''),
+            pincode=validated_data.get('pincode', ''),
+            company_name=validated_data.get('company_name', ''),
         )
         return user
 
@@ -33,5 +36,5 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = C0User
-        fields = ['id', 'username', 'email', 'role', 'phone', 'date_joined']
+        fields = ['id', 'username', 'email', 'role', 'phone', 'location', 'pincode', 'company_name', 'date_joined']
         read_only_fields = fields

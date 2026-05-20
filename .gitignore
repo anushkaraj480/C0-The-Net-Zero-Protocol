@@ -32,3 +32,4 @@ c0_frontend/dist-ssr/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+.aider*

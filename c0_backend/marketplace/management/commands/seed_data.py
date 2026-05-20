@@ -73,7 +73,7 @@ class Command(BaseCommand):
     help = 'Seed the database with sample carbon projects and listings.'
 
     def handle(self, *args, **options):
-        # Create a demo seller
+        # Create or update demo seller
         seller, created = C0User.objects.get_or_create(
             username='demo_seller',
             defaults={
@@ -81,12 +81,13 @@ class Command(BaseCommand):
                 'role': 'farmer',
             },
         )
-        if created:
-            seller.set_password('demo1234')
-            seller.save()
-            self.stdout.write(self.style.SUCCESS('Created demo seller user.'))
+        seller.set_password('demo1234')
+        seller.is_staff = True
+        seller.is_superuser = True
+        seller.save()
+        self.stdout.write(self.style.SUCCESS('Created/updated demo seller user with superuser permissions.'))
 
-        # Create a demo buyer
+        # Create or update demo buyer
         buyer, created = C0User.objects.get_or_create(
             username='demo_buyer',
             defaults={
@@ -94,10 +95,11 @@ class Command(BaseCommand):
                 'role': 'buyer',
             },
         )
-        if created:
-            buyer.set_password('demo1234')
-            buyer.save()
-            self.stdout.write(self.style.SUCCESS('Created demo buyer user.'))
+        buyer.set_password('demo1234')
+        buyer.is_staff = True
+        buyer.is_superuser = True
+        buyer.save()
+        self.stdout.write(self.style.SUCCESS('Created/updated demo buyer user with superuser permissions.'))
 
         # Create projects and listings
         for i, proj_data in enumerate(SAMPLE_PROJECTS):

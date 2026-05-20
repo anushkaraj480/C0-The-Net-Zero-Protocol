@@ -5,6 +5,7 @@ import Earth3D from './Earth3D';
 import { dashboardAPI } from '../api/client';
 import type { DashboardStats } from '../api/client';
 
+
 export default function Hero() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -95,18 +96,14 @@ export default function Hero() {
           )}
         </motion.div>
 
-        <motion.button 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-          className="bg-primary text-background font-bold text-lg px-8 py-4 rounded-full shadow-[0_0_30px_rgba(0,255,178,0.5)] hover:shadow-[0_0_50px_rgba(0,255,178,0.8)] transition-all transform hover:-translate-y-1"
-        >
-          Explore Projects
-        </motion.button>
+
+
       </div>
 
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+      <div 
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer"
+        onClick={() => document.getElementById('what-is-c0')?.scrollIntoView({ behavior: 'smooth' })}
+      >
         <ChevronDown className="w-8 h-8 text-primary/50" />
       </div>
     </motion.section>

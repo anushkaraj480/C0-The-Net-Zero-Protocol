@@ -135,3 +135,19 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.buyer.username} bought {self.quantity_purchased} from {self.listing}"
+
+
+class MarketDataSnapshot(models.Model):
+    """Historical snapshot of market data scraped from external sources (e.g., IEX)."""
+    
+    date = models.DateField(unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Market Clearing Price / REC price
+    volume = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'market_data_snapshots'
+        ordering = ['date']
+
+    def __str__(self):
+        return f"Market Data on {self.date}: {self.price}"
