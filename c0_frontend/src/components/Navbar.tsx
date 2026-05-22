@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Globe, User, LogOut, ChevronDown } from 'lucide-react';
+import { Globe, User, LogOut, ChevronDown, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
@@ -11,14 +12,22 @@ export default function Navbar() {
   return (
     <>
       <nav className="fixed top-0 w-full z-40 glass-panel border-t-0 border-x-0 rounded-none py-4 px-8 flex justify-between items-center">
-        <div className="text-xl font-bold flex items-center gap-2 text-primary">
+        <Link to="/" className="text-xl font-bold flex items-center gap-2 text-primary cursor-pointer hover:opacity-90">
           <Globe className="w-6 h-6" />
           <span>C0 Net-Zero</span>
-        </div>
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <a href="#projects" className="hover:text-primary transition-colors">Projects</a>
-          <a href="#market" className="hover:text-primary transition-colors">Market</a>
-          <a href="#dashboard" className="hover:text-primary transition-colors">Dashboard</a>
+        </Link>
+        
+        <div className="flex items-center gap-6 text-sm font-medium">
+          <a href="#projects" className="hidden md:block hover:text-primary transition-colors">Projects</a>
+          <a href="#market" className="hidden md:block hover:text-primary transition-colors">Market</a>
+          <a href="#dashboard" className="hidden md:block hover:text-primary transition-colors">Dashboard</a>
+
+          <Link 
+            to="/onboarding" 
+            className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:text-white transition-colors bg-primary/10 border border-primary/20 px-4 py-2.5 rounded-xl animate-pulse hover:animate-none"
+          >
+            <BookOpen className="w-4 h-4" /> How It Works
+          </Link>
 
           {isLoggedIn ? (
             <div className="relative">
@@ -35,7 +44,7 @@ export default function Navbar() {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 glass-panel p-2 border border-white/10 rounded-xl">
+                <div className="absolute right-0 mt-2 w-56 glass-panel p-2 border border-white/10 rounded-xl bg-background/95 backdrop-blur-2xl">
                   <div className="px-3 py-2 border-b border-white/10 mb-1">
                     <div className="text-xs text-gray-400">Signed in as</div>
                     <div className="text-sm font-medium truncate">{user?.email}</div>
@@ -56,7 +65,7 @@ export default function Navbar() {
             <button
               id="login-button"
               onClick={() => setShowAuthModal(true)}
-              className="px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/10 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <User className="w-4 h-4" />
               Sign In

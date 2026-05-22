@@ -61,24 +61,24 @@ function Earth() {
     return mat;
   }, [colorMap, normalMap]);
 
-  useFrame(({ clock, mouse }) => {
-    const t = clock.getElapsedTime();
-
-    // Smooth rotation
-    const rotationY = t * 0.08;
-    const rotationX = mouse.y * 0.2;
+  useFrame(({ mouse }) => {
+    // Dynamically rotate Earth on Y-axis (left/right) based on mouse X, and X-axis (up/down) based on mouse Y
+    // Use MathUtils.lerp for fluid, ultra-smooth movement as the cursor moves
+    const targetY = mouse.x * 1.8;
+    const targetX = -mouse.y * 0.8;
 
     if (earthRef.current) {
-      earthRef.current.rotation.y = rotationY;
-      earthRef.current.rotation.x = rotationX;
+      earthRef.current.rotation.y = THREE.MathUtils.lerp(earthRef.current.rotation.y, targetY, 0.05);
+      earthRef.current.rotation.x = THREE.MathUtils.lerp(earthRef.current.rotation.x, targetX, 0.05);
     }
     if (cloudRef.current) {
-      cloudRef.current.rotation.y = rotationY * 1.05;
-      cloudRef.current.rotation.x = rotationX;
+      // Parallax effect on clouds
+      cloudRef.current.rotation.y = THREE.MathUtils.lerp(cloudRef.current.rotation.y, targetY * 1.15, 0.04);
+      cloudRef.current.rotation.x = THREE.MathUtils.lerp(cloudRef.current.rotation.x, targetX * 1.15, 0.04);
     }
     if (wireframeRef.current) {
-      wireframeRef.current.rotation.y = rotationY;
-      wireframeRef.current.rotation.x = rotationX;
+      wireframeRef.current.rotation.y = THREE.MathUtils.lerp(wireframeRef.current.rotation.y, targetY, 0.05);
+      wireframeRef.current.rotation.x = THREE.MathUtils.lerp(wireframeRef.current.rotation.x, targetX, 0.05);
     }
   });
 

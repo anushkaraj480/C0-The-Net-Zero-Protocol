@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Wind, TrendingUp, Leaf } from 'lucide-react';
 
 export default function CarbonDashboard() {
   const [landSize, setLandSize] = useState(500);
@@ -39,102 +38,69 @@ export default function CarbonDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* 6. AI Suggestions */}
-          <div className="glass-panel p-6 flex flex-col">
-            <div className="flex items-center gap-2 mb-6 text-accent">
-              <Wind className="w-5 h-5" />
-              <h3 className="text-lg font-bold">AI Intelligence</h3>
-            </div>
-            <div className="flex flex-col gap-4 flex-1">
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-accent/50 transition-colors cursor-pointer"
-              >
-                <p className="text-sm font-medium mb-1">Switch to drip irrigation</p>
-                <p className="text-xs text-gray-400 mb-2">Reduce agricultural emissions by 18%</p>
-                <div className="text-accent text-xs flex items-center gap-1 font-semibold">
-                  <TrendingUp className="w-3 h-3" /> High Impact
+        {/* Credit Generation Estimator - Full Width */}
+        <div className="glass-panel p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="text-xl font-bold mb-2">Generation Estimator</h3>
+            <p className="text-sm text-gray-400 mb-8">Calculate your land's credit potential dynamically.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <label className="text-sm text-gray-400 block">Land Size</label>
+                  <span className="text-primary font-mono font-bold">{landSize} ha</span>
                 </div>
-              </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-primary/50 transition-colors cursor-pointer"
-              >
-                <p className="text-sm font-medium mb-1">Plant cover crops</p>
-                <p className="text-xs text-gray-400 mb-2">Increase soil carbon sequestration</p>
-                <div className="text-primary text-xs flex items-center gap-1 font-semibold">
-                  <Leaf className="w-3 h-3" /> +1.2t / hectare
+                <input 
+                  type="range" 
+                  className="w-full accent-primary" 
+                  min="10" 
+                  max="5000" 
+                  value={landSize}
+                  onChange={(e) => setLandSize(Number(e.target.value))}
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>10ha</span>
+                  <span>5000ha</span>
                 </div>
-              </motion.div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-400 block mb-2">Project Type</label>
+                <select 
+                  value={projectType}
+                  onChange={(e) => setProjectType(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-primary [&>option]:bg-background"
+                >
+                  <option>Agroforestry</option>
+                  <option>Regenerative Agriculture</option>
+                  <option>Reforestation</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* 7. Credit Generation Estimator */}
-          <div className="glass-panel p-6 lg:col-span-2 flex flex-col justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Generation Estimator</h3>
-              <p className="text-sm text-gray-400 mb-8">Calculate your land's credit potential dynamically.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div>
-                  <div className="flex justify-between items-end mb-2">
-                    <label className="text-sm text-gray-400 block">Land Size</label>
-                    <span className="text-primary font-mono font-bold">{landSize} ha</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    className="w-full accent-primary" 
-                    min="10" 
-                    max="5000" 
-                    value={landSize}
-                    onChange={(e) => setLandSize(Number(e.target.value))}
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>10ha</span>
-                    <span>5000ha</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400 block mb-2">Project Type</label>
-                  <select 
-                    value={projectType}
-                    onChange={(e) => setProjectType(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-primary [&>option]:bg-background"
-                  >
-                    <option>Agroforestry</option>
-                    <option>Regenerative Agriculture</option>
-                    <option>Reforestation</option>
-                  </select>
-                </div>
-              </div>
+          <div className="bg-[#0B0F1A]/50 rounded-xl p-6 border border-white/5 flex flex-col sm:flex-row justify-around items-center gap-6">
+            <div className="text-center">
+              <div className="text-gray-400 text-sm mb-1">Estimated Credits / Yr</div>
+              <motion.div 
+                key={estimatedCredits}
+                initial={{ scale: 1.1, color: '#ffffff' }}
+                animate={{ scale: 1, color: '#00FFB2' }}
+                className="text-3xl font-black text-primary"
+              >
+                {estimatedCredits.toLocaleString()}<span className="text-sm font-normal">t</span>
+              </motion.div>
             </div>
-
-            <div className="bg-[#0B0F1A]/50 rounded-xl p-6 border border-white/5 flex flex-col sm:flex-row justify-around items-center gap-6">
-              <div className="text-center">
-                <div className="text-gray-400 text-sm mb-1">Estimated Credits / Yr</div>
-                <motion.div 
-                  key={estimatedCredits}
-                  initial={{ scale: 1.1, color: '#ffffff' }}
-                  animate={{ scale: 1, color: '#00FFB2' }}
-                  className="text-3xl font-black text-primary"
-                >
-                  {estimatedCredits.toLocaleString()}<span className="text-sm font-normal">t</span>
-                </motion.div>
-              </div>
-              <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-              <div className="text-center">
-                <div className="text-gray-400 text-sm mb-1">Revenue Potential</div>
-                <motion.div 
-                  key={revenuePotential}
-                  initial={{ scale: 1.1, color: '#ffffff' }}
-                  animate={{ scale: 1, color: '#00CFFF' }}
-                  className="text-3xl font-black text-accent"
-                >
-                  ${revenuePotential.toLocaleString()}
-                </motion.div>
-              </div>
+            <div className="hidden sm:block w-px h-12 bg-white/10"></div>
+            <div className="text-center">
+              <div className="text-gray-400 text-sm mb-1">Revenue Potential</div>
+              <motion.div 
+                key={revenuePotential}
+                initial={{ scale: 1.1, color: '#ffffff' }}
+                animate={{ scale: 1, color: '#00CFFF' }}
+                className="text-3xl font-black text-accent"
+              >
+                ${revenuePotential.toLocaleString()}
+              </motion.div>
             </div>
           </div>
         </div>

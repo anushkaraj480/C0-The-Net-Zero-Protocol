@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authAPI } from '../api/client';
 import type { UserInfo } from '../api/client';
 
@@ -7,7 +7,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string, role?: string) => Promise<void>;
+  register: (username: string, email: string, password: string, role?: string, phone?: string) => Promise<void>;
   logout: () => void;
   error: string | null;
   clearError: () => void;
@@ -47,10 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string, role = 'farmer') => {
+  const register = async (username: string, email: string, password: string, role = 'farmer', phone = '') => {
     setError(null);
     try {
-      await authAPI.register({ username, email, password, role });
+      await authAPI.register({ username, email, password, role, phone });
       // Auto-login after registration
       await login(username, password);
     } catch (err: any) {
