@@ -1,0 +1,11 @@
+{
+  "name": "c0-net-zero-root",
+  "version": "1.0.0",
+  "description": "Root project runner for C0 Net-Zero",
+  "scripts": {
+    "dev": "npx --yes concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd c0_frontend && npm run dev",
+    "dev:backend": "cd c0_backend && .\\venv\\Scripts\\python.exe manage.py runserver",
+    "setup": "cd c0_frontend && npm install && cd ../c0_backend && python -m venv venv && .\\venv\\Scripts\\python.exe -m pip install -r requirements.txt && .\\venv\\Scripts\\python.exe manage.py migrate"
+  }
+}

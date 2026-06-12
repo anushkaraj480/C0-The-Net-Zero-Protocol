@@ -39,34 +39,33 @@ export default function Hero() {
   return (
     <motion.section 
       style={{ opacity: heroOpacity, scale: heroScale }}
-      className="relative h-screen flex flex-col justify-center items-center text-center px-4 pt-20"
+      className="relative h-screen flex flex-col md:flex-row items-center justify-between px-8 md:px-16 pt-20 max-w-[1600px] mx-auto w-full overflow-hidden"
     >
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
-        <Earth3D />
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto">
+      {/* Left side text (40%) */}
+      <div className="relative z-10 w-full md:w-[40%] text-left mt-20 md:mt-0">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight">
-            Track. <span className="text-primary text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Restore.</span> Act.
+          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-tight">
+            Track. <br className="hidden md:block" />
+            <span className="text-primary">Restore.</span> <br className="hidden md:block" />
+            Act.
           </h1>
-          <p className="text-xl md:text-2xl text-gray-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-400 mb-10 max-w-lg">
             Transforming degraded landscapes into verifiable carbon credits. 
             The intelligent way to reach net-zero.
           </p>
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="flex flex-wrap justify-center gap-6 mb-12"
+          className="flex flex-wrap justify-start gap-6 mb-12"
         >
-          <div className="glass-panel px-6 py-4 flex flex-col items-center">
+          <div className="glass-panel px-6 py-4 flex flex-col items-start text-left">
             <motion.span 
               key={stats?.total_sequestered_tco2e}
               initial={{ scale: 1.1 }}
@@ -77,7 +76,7 @@ export default function Hero() {
             </motion.span>
             <span className="text-sm text-gray-400 uppercase tracking-wider">Tons CO₂ Sequestered</span>
           </div>
-          <div className="glass-panel px-6 py-4 flex flex-col items-center">
+          <div className="glass-panel px-6 py-4 flex flex-col items-start text-left">
             <motion.span 
               key={stats?.total_hectares}
               initial={{ scale: 1.1 }}
@@ -89,19 +88,21 @@ export default function Hero() {
             <span className="text-sm text-gray-400 uppercase tracking-wider">Hectares Restored</span>
           </div>
           {stats && stats.active_listings > 0 && (
-            <div className="glass-panel px-6 py-4 flex flex-col items-center">
+            <div className="glass-panel px-6 py-4 flex flex-col items-start text-left">
               <span className="text-yellow-400 text-3xl font-bold">{stats.active_listings}</span>
               <span className="text-sm text-gray-400 uppercase tracking-wider">Active Projects</span>
             </div>
           )}
         </motion.div>
+      </div>
 
-
-
+      {/* Right side Earth (60%) */}
+      <div className="relative z-0 w-full md:w-[60%] h-[50vh] md:h-full flex items-center justify-end pointer-events-auto">
+        <Earth3D className="w-full h-full md:w-[120%] md:absolute md:right-[-10%]" />
       </div>
 
       <div 
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20"
         onClick={() => document.getElementById('what-is-c0')?.scrollIntoView({ behavior: 'smooth' })}
       >
         <ChevronDown className="w-8 h-8 text-primary/50" />

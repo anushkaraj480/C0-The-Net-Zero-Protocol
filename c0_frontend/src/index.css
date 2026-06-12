@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0B0F1A;
-  --color-primary: #00FFB2;
-  --color-accent: #00CFFF;
+  --color-background: #00063d;
+  /* Deep Space midnight blue */
+  --color-primary: #52B788;
+  /* Leaf Green -> Neon Green */
+  --color-accent: #dad7cd;
+  /* Warm Sage/Linen */
 }
 
 @layer base {
@@ -17,11 +20,26 @@
 
 @layer utilities {
   .glass-panel {
-    background-color: rgb(255 255 255 / 0.05);
+    background-color: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(12px);
-    border: 1px solid rgb(255 255 255 / 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Light Sage Section Utilities */
+  .sage-section {
+    background-color: #dad7cd;
+    color: #142701;
+  }
+
+  .sage-glass-panel {
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(20, 39, 1, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(20, 39, 1, 0.05);
+    color: #142701;
   }
 
   .glow-shadow {
@@ -29,7 +47,7 @@
   }
 
   .glow-shadow-blue {
-    box-shadow: 0 0 20px rgba(0, 207, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -39,14 +57,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F1A;
+  background: #000320;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00FFB2;
+  background: #1B4332;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00CFFF;
+  background: #dad7cd;
 }

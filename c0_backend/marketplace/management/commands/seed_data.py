@@ -10,55 +10,55 @@ from marketplace.models import CarbonProject, CreditListing
 
 SAMPLE_PROJECTS = [
     {
-        'name': 'Amazon Reforestation Initiative',
+        'name': 'Western Ghats Reforestation',
         'project_type': 'reforestation',
-        'location_text': 'Amazonas, Brazil',
-        'description': 'Large-scale reforestation of degraded Amazon rainforest areas, restoring biodiversity and sequestering carbon.',
+        'location_text': 'Karnataka, India',
+        'description': 'Restoration and protection of degraded forest ecosystems in the Western Ghats biodiversity hotspot.',
         'standard': 'verra',
         'total_hectares': 15000,
         'total_sequestered_tco2e': 450000,
     },
     {
-        'name': 'Midwest Soil Carbon Program',
+        'name': 'Punjab Regenerative Farming',
         'project_type': 'soil_carbon',
-        'location_text': 'Iowa, USA',
-        'description': 'Regenerative agriculture practices across 500 farms to increase soil organic carbon.',
+        'location_text': 'Punjab, India',
+        'description': 'Regenerative agricultural practices and organic carbon enhancement across farms in Punjab.',
         'standard': 'gold_standard',
         'total_hectares': 8500,
         'total_sequestered_tco2e': 120000,
     },
     {
-        'name': 'Rajasthan Solar Farm',
+        'name': 'Bhadla Solar Park',
         'project_type': 'renewable_energy',
         'location_text': 'Rajasthan, India',
-        'description': '200 MW solar installation displacing coal-fired electricity generation.',
+        'description': 'Massive solar installation displacing grid electricity with clean solar energy in the Thar desert.',
         'standard': 'verra',
         'total_hectares': 400,
         'total_sequestered_tco2e': 380000,
     },
     {
-        'name': 'Kenya Mangrove Restoration',
+        'name': 'Sundarbans Mangrove Restoration',
         'project_type': 'blue_carbon',
-        'location_text': 'Lamu, Kenya',
-        'description': 'Restoring 3,000 hectares of mangrove forests along the Kenyan coast.',
+        'location_text': 'West Bengal, India',
+        'description': 'Restoring mangrove ecosystems in the Sundarbans region to protect coastlines and sequester blue carbon.',
         'standard': 'gold_standard',
         'total_hectares': 3000,
         'total_sequestered_tco2e': 95000,
     },
     {
-        'name': 'Alberta Methane Capture',
+        'name': 'Mumbai Biogas Methane Capture',
         'project_type': 'methane_capture',
-        'location_text': 'Alberta, Canada',
-        'description': 'Capturing methane from oil and gas operations and converting to energy.',
+        'location_text': 'Maharashtra, India',
+        'description': 'Methane recovery and bio-CNG generation from municipal solid waste facilities in Mumbai.',
         'standard': 'acr',
         'total_hectares': 50,
         'total_sequestered_tco2e': 210000,
     },
     {
-        'name': 'Iceland DAC Facility',
+        'name': 'Mundra DAC Facility',
         'project_type': 'direct_air_capture',
-        'location_text': 'Hellisheiði, Iceland',
-        'description': 'Direct air capture plant storing CO₂ as mineral carbonates underground.',
+        'location_text': 'Gujarat, India',
+        'description': 'Pilot direct air capture facility storing carbon dioxide permanently in saline aquifers.',
         'standard': 'puro',
         'total_hectares': 10,
         'total_sequestered_tco2e': 36000,
@@ -119,4 +119,4 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(f'  Skipped (exists): {project.name}')
 
-        self.stdout.write(self.style.SUCCESS('\n✓ Seed data complete.'))
+        self.stdout.write(self.style.SUCCESS('\nSeed data complete.'))

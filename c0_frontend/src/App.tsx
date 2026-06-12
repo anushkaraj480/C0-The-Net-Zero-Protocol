@@ -9,6 +9,7 @@ import MRVStatus from './components/MRVStatus';
 import Storytelling from './components/Storytelling';
 import CarbonMarket from './components/CarbonMarket';
 import Footer from './components/Footer';
+import HowItWorks from './components/HowItWorks';
 
 export default function App() {
   return (
@@ -17,23 +18,27 @@ export default function App() {
       <Navbar />
 
       <Hero />
-      
-      <div id="what-is-c0">
-        <section className="pt-24 pb-4 px-6 text-center max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">What is C0: The Net Zero Protocol</h2>
-          <p className="text-xl text-gray-400">
-            We are a decentralized platform dedicated to transforming degraded land into thriving ecosystems. 
-            By leveraging transparent verification and continuous monitoring, we produce high-quality carbon credits 
-            to accelerate the global transition to a net-zero future.
-          </p>
-        </section>
-        <MRVStatus />
-        <PerCreditImpact />
+
+      <div className="sage-section relative z-10 border-t border-black/5">
+        <div id="what-is-c0">
+          <section className="pt-24 pb-4 px-6 text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#142701]">What is C0: The Net Zero Protocol</h2>
+            <p className="text-xl text-[#142701]/80">
+              We are a decentralized platform dedicated to transforming degraded land into thriving ecosystems.
+              By leveraging transparent verification and continuous monitoring, we produce high-quality carbon credits
+              to accelerate the global transition to a net-zero future.
+            </p>
+          </section>
+          <HowItWorks />
+          <MRVStatus />
+          <PerCreditImpact />
+        </div>
+
+        <Storytelling />
+        <MarketTrends />
+        <ProjectListing />
       </div>
-      
-      <Storytelling />
-      <MarketTrends />
-      <ProjectListing />
+
       <CarbonDashboard />
       <CarbonMarket />
 
@@ -41,3 +46,6 @@ export default function App() {
     </div>
   );
 }
+
+
+

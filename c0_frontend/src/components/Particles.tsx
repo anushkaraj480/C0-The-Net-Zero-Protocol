@@ -41,7 +41,7 @@ export default function Particles() {
       </bufferGeometry>
       <pointsMaterial 
         size={0.015} 
-        color="#00FFB2" 
+        color="#52B788" 
         transparent 
         opacity={0.6}
         sizeAttenuation 
@@ -49,3 +49,6 @@ export default function Particles() {
     </points>
   );
 }
+
+
+
