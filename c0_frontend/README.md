@@ -1,6 +1,6 @@
 # C0 Frontend — React + Vite + TypeScript
 
-Interactive dashboard and marketplace UI for the C0 Net-Zero Protocol.
+Interactive dashboard and marketplace UI for C0: Carbon Intelligence Platform.
 
 ## Setup
 

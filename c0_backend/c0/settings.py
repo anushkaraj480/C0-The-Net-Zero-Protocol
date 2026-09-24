@@ -1,5 +1,5 @@
 """
-Django settings for C0 – The Net-Zero Protocol.
+Django settings for C0: Carbon Intelligence Platform.
 """
 
 import os

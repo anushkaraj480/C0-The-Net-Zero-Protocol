@@ -47,7 +47,7 @@ export default function Preloader() {
 
       {/* Brand Name */}
       <h1 className="mt-8 text-2xl font-bold tracking-widest text-primary/90 uppercase animate-pulse">
-        C0 Net-Zero
+        C0: Carbon Intelligence Platform
       </h1>
       <p className="mt-2 text-sm text-gray-400 tracking-wider">
         Loading Platform...

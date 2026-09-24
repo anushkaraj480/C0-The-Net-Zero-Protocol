@@ -121,7 +121,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
             <div className="text-center mb-8 mt-2">
               <h2 className="text-2xl font-bold mb-2">
-                {mode === 'login' ? 'Welcome Back' : 'Join C0 Net-Zero'}
+                {mode === 'login' ? 'Welcome Back' : 'Join C0: Carbon Intelligence Platform'}
               </h2>
               <p className="text-sm text-gray-400">
                 {mode === 'login'

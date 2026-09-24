@@ -22,7 +22,7 @@ export default function App() {
       <div className="sage-section relative z-10 border-t border-black/5">
         <div id="what-is-c0">
           <section className="pt-24 pb-4 px-6 text-center max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#142701]">What is C0: The Net Zero Protocol</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#142701]">What is C0: Carbon Intelligence Platform</h2>
             <p className="text-xl text-[#142701]/80">
               We are a decentralized platform dedicated to transforming degraded land into thriving ecosystems.
               By leveraging transparent verification and continuous monitoring, we produce high-quality carbon credits

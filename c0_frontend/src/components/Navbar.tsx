@@ -13,7 +13,7 @@ export default function Navbar() {
       <nav className="fixed top-0 w-full z-40 bg-[#00063d] border-b border-white/10 py-4 px-8 flex justify-between items-center">
         <div className="text-xl font-bold flex items-center gap-2 text-primary">
           <Globe className="w-6 h-6" />
-          <span>C0 Net-Zero</span>
+          <span>C0: Carbon Intelligence Platform</span>
         </div>
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">
           <a href="/" className="hover:text-primary transition-colors">Home Page</a>

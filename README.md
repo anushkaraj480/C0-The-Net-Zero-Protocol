@@ -1,4 +1,4 @@
-# C0 — The Net-Zero Protocol
+# C0: Carbon Intelligence Platform
 
 A full-stack carbon credit marketplace platform for transparent carbon offset trading, MRV (Measurement, Reporting & Verification) tracking, and real-time market analytics.
 
